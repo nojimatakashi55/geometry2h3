@@ -1,14 +1,14 @@
 # coding:utf-8
 from shapely.geometry.base import BaseGeometry
 from shapely import wkt
-from shapely.geometry import shape, box, mapping, LineString, Polygon
-import polyline
-from tile_shape import TileShape
-import functools
+from shapely.geometry import shape, box, mapping, Polygon, Point
 import h3
+import functools
 import itertools
-import shapely
-import math
+
+from shapely2h3.polyline_shape import PolylineShape
+from shapely2h3.tile_shape import TileShape
+from shapely2h3.center_radius_shape import CenterRadiusShape
 
 POLYGON_H3_CONTAIN_SET = {
     "overlap",          # h3 is partially contained in shape
@@ -26,76 +26,51 @@ class Geometry(object):
         self.h3_set = set()
 
     def __repr__(self):
-        cls_name = self.__class__.__name__
         geom_types = list(map(lambda x : x.geom_type, self.geoms))
         h3_cells_count = len(self.h3_set)
 
-        return f"<{cls_name}(h3_resolution={self.h3_resolution}, geom_types={geom_types}, h3_cells_count={h3_cells_count})>"
+        return f"<Geometry(h3_resolution={self.h3_resolution}, geom_types={geom_types}, h3_cells_count={h3_cells_count})>"
 
     def set_shapely(self, shapely_geom, append=False):
-        if not isinstance(shapely_geom, BaseGeometry):
-            raise TypeError("Invalid shapely geometry instance")
+        try:
+            if not isinstance(shapely_geom, BaseGeometry):
+                raise TypeError("Invalid shapely geometry instance")
 
-        if not shapely_geom.is_valid:
-            raise ValueError("Invalid shapely geometry")
+            if not shapely_geom.is_valid:
+                raise ValueError("Invalid shapely geometry")
 
-        if append:
-            self.geoms.append(shapely_geom)
+            if append:
+                self.geoms.append(shapely_geom)
 
-        else:
-            self.geoms = [shapely_geom]
+            else:
+                self.geoms = [shapely_geom]
+
+        except Exception as e:
+            raise ValueError(f"Failed to set shapely geometry: {e}")
 
     def set_wkt(self, wkt_str, append=False):
-        try:
-            geom = wkt.loads(wkt_str)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Invalid WKT: {e}")
+        geom = wkt.loads(wkt_str)
+        self.set_shapely(geom, append)
 
     def set_geojson(self, geojson_dict, append=False):
-        try:
-            geom = shape(geojson_dict)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Invalid geojson: {e}")
+        geom = shape(geojson_dict)
+        self.set_shapely(geom, append)
 
     def set_bbox(self, minx, miny, maxx, maxy, append=False):
-        try:
-            geom = box(minx, miny, maxx, maxy)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Invalid bbox: {e}")
+        geom = box(minx, miny, maxx, maxy)
+        self.set_shapely(geom, append)
 
     def set_polyline(self, encoded_str, append=False):
-        try:
-            coords = polyline.decode(encoded_str)
-            line = LineString(map(lambda x: (x[1], x[0]), coords))
-            self.set_shapely(line, append)
-
-        except Exception as e:
-            raise ValueError(f"Invalid encoded polyline: {e}")
+        geom = PolylineShape(encoded_str)
+        self.set_shapely(geom, append)
 
     def set_tile(self, z, x, y, append=False):
-        try:
-            tile = TileShape(z, x, y)
-            self.set_shapely(tile.shape, append)
-
-        except Exception as e:
-            raise ValueError(f"Invalid tile (z={z}, x={x}, y={y}): {e}")
+        geom = TileShape(z, x, y)
+        self.set_shapely(geom, append)
 
     def set_center_radius(self, lat, lon, radius_meter, append=False):
-        try:
-            equator_radius = 6378137
-            d = (360 * 1000) / (2 * math.pi * (equator_radius * math.cos(lat * math.pi / 180.0))) / 1000.0
-            buffer_distance = d * radius_meter
-
-            self.set_shapely(Point(lon, lat).buffer(buffer_distance), append)
-
-        except Exception as e:
-            raise ValueError(f"Invalid center radius (lat={lat}, lon={lon}, radius_meter={radius_meter}): {e}")
+        geom = CenterRadiusShape(lat, lon, radius_meter)
+        self.set_shapely(geom, append)
 
     def __h3_point_geom(self, point_geom):
         return {
@@ -113,7 +88,7 @@ class Geometry(object):
         h3_iter = set(h3_iter)
         h3_iter = map(lambda x : (x, h3.cell_to_boundary(x)), h3_iter)
         h3_iter = map(lambda x : (x[0], Polygon(map(lambda y : (y[1], y[0]), x[1]))), h3_iter)
-        h3_iter = filter(lambda x : shapely.crosses(line_geom, x[1]), h3_iter)
+        h3_iter = filter(lambda x : line_geom.crosses(x[1]), h3_iter)
         h3_iter = map(lambda x : x[0], h3_iter)
         h3_set = set(h3_iter)
 
@@ -129,30 +104,27 @@ class Geometry(object):
             if self.polygon_h3_contain == "overlap":
                 h3_set_exterior = self.__h3_line_geom(polygon_geom.exterior)
                 h3_iter = h3_set_fill | h3_set_exterior
-
                 h3_iter = map(lambda x : (x, h3.cell_to_boundary(x)), h3_iter)
                 h3_iter = map(lambda x : (x[0], Polygon(map(lambda y : (y[1], y[0]), x[1]))), h3_iter)
 
-                f_filter = lambda x : shapely.crosses(polygon_geom, x[1])
+                f_filter = lambda x : polygon_geom.crosses(x[1])
 
             elif self.polygon_h3_contain == "full":
                 h3_iter = map(lambda x : (x, h3.cell_to_boundary(x)), h3_set_fill)
                 h3_iter = map(lambda x : (x[0], Polygon(map(lambda y : (y[1], y[0]), x[1]))), h3_iter)
 
-                f_filter = lambda x : shapely.contains(polygon_geom, x[1])
+                f_filter = lambda x : polygon_geom.contains(x[1])
 
             elif self.polygon_h3_contain == "center":
                 h3_set_exterior = self.__h3_line_geom(polygon_geom.exterior)
                 h3_iter = h3_set_fill | h3_set_exterior
-
                 h3_iter = map(lambda x : (x, h3.cell_to_latlng(x)), h3_iter)
 
-                f_filter = lambda x : shapely.contains_xy(polygon_geom, x[1][1], x[1][0])
+                f_filter = lambda x : polygon_geom.contains(Point(x[1][1], x[1][0]))
 
             elif self.polygon_h3_contain == "bbox_overlap":
                 h3_set_exterior = self.__h3_line_geom(polygon_geom.exterior)
                 h3_iter = h3_set_fill | h3_set_exterior
-
                 h3_iter = map(lambda x : (x, h3.cell_to_boundary(x)), h3_iter)
                 f_lat = lambda x : x[0]
                 f_lon = lambda x : x[1]
@@ -167,7 +139,7 @@ class Geometry(object):
                 ), h3_iter)
                 h3_iter = map(lambda x : (x[0], box(*x[1])), h3_iter)
 
-                f_filter = lambda x : shapely.crosses(polygon_geom, x[1])
+                f_filter = lambda x : polygon_geom.crosses(x[1])
 
             h3_iter = filter(f_filter, h3_iter)
             h3_iter = map(lambda x : x[0], h3_iter)
