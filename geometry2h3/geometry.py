@@ -6,9 +6,9 @@ import h3
 import functools
 import itertools
 
-from shapely2h3.polyline_shape import PolylineShape
-from shapely2h3.tile_shape import TileShape
-from shapely2h3.center_radius_shape import CenterRadiusShape
+from geometry2h3.polyline_shape import PolylineShape
+from geometry2h3.tile_shape import TileShape
+from geometry2h3.center_radius_shape import CenterRadiusShape
 
 POLYGON_H3_CONTAIN_SET = {
     "overlap",          # h3 is partially contained in shape
@@ -29,7 +29,7 @@ class Geometry(object):
         geom_types = list(map(lambda x : x.geom_type, self.geoms))
         h3_cells_count = len(self.h3_set)
 
-        return f"<Geometry(h3_resolution={self.h3_resolution}, geom_types={geom_types}, h3_cells_count={h3_cells_count})>"
+        return f"<Geometry(h3_resolution={self.h3_resolution}, polygon_h3_contain={self.polygon_h3_contain}, geom_types={geom_types}, h3_cells_count={h3_cells_count})>"
 
     def set_shapely(self, shapely_geom, append=False):
         try:
@@ -46,31 +46,55 @@ class Geometry(object):
                 self.geoms = [shapely_geom]
 
         except Exception as e:
-            raise ValueError(f"Failed to set shapely geometry: {e}")
+            raise type(e)(f"Failed to set shapely geometry: {e}")
 
     def set_wkt(self, wkt_str, append=False):
-        geom = wkt.loads(wkt_str)
-        self.set_shapely(geom, append)
+        try:
+            geom = wkt.loads(wkt_str)
+            self.set_shapely(geom, append)
+
+        except Exception as e:
+            raise ValueError(f"Failed to set WKT geometry: {e}")
 
     def set_geojson(self, geojson_dict, append=False):
-        geom = shape(geojson_dict)
-        self.set_shapely(geom, append)
+        try:
+            geom = shape(geojson_dict)
+            self.set_shapely(geom, append)
+
+        except Exception as e:
+            raise ValueError(f"Failed to set geojson geometry: {e}")
 
     def set_bbox(self, minx, miny, maxx, maxy, append=False):
-        geom = box(minx, miny, maxx, maxy)
-        self.set_shapely(geom, append)
+        try:
+            geom = box(minx, miny, maxx, maxy)
+            self.set_shapely(geom, append)
+
+        except Exception as e:
+            raise ValueError(f"Failed to set box geometry: {e}")
 
     def set_polyline(self, encoded_str, append=False):
-        geom = PolylineShape(encoded_str)
-        self.set_shapely(geom, append)
+        try:
+            geom = PolylineShape(encoded_str)
+            self.set_shapely(geom, append)
+
+        except Exception as e:
+            raise ValueError(f"Failed to set polyline geometry: {e}")
 
     def set_tile(self, z, x, y, append=False):
-        geom = TileShape(z, x, y)
-        self.set_shapely(geom, append)
+        try:
+            geom = TileShape(z, x, y)
+            self.set_shapely(geom, append)
+
+        except Exception as e:
+            raise ValueError(f"Failed to set tile geometry: {e}")
 
     def set_center_radius(self, lat, lon, radius_meter, append=False):
-        geom = CenterRadiusShape(lat, lon, radius_meter)
-        self.set_shapely(geom, append)
+        try:
+            geom = CenterRadiusShape(lat, lon, radius_meter)
+            self.set_shapely(geom, append)
+
+        except Exception as e:
+            raise ValueError(f"Failed to set center radius geometry: {e}")
 
     def __h3_point_geom(self, point_geom):
         return {
@@ -107,7 +131,7 @@ class Geometry(object):
                 h3_iter = map(lambda x : (x, h3.cell_to_boundary(x)), h3_iter)
                 h3_iter = map(lambda x : (x[0], Polygon(map(lambda y : (y[1], y[0]), x[1]))), h3_iter)
 
-                f_filter = lambda x : polygon_geom.crosses(x[1])
+                f_filter = lambda x : polygon_geom.overlaps(x[1])
 
             elif self.polygon_h3_contain == "full":
                 h3_iter = map(lambda x : (x, h3.cell_to_boundary(x)), h3_set_fill)
@@ -139,7 +163,7 @@ class Geometry(object):
                 ), h3_iter)
                 h3_iter = map(lambda x : (x[0], box(*x[1])), h3_iter)
 
-                f_filter = lambda x : polygon_geom.crosses(x[1])
+                f_filter = lambda x : polygon_geom.overlaps(x[1])
 
             h3_iter = filter(f_filter, h3_iter)
             h3_iter = map(lambda x : x[0], h3_iter)

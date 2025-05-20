@@ -1,5 +1,5 @@
 # coding:utf-8
-from shapely.geometry import Point
+from shapely.geometry import Polygon, Point
 import math
 
 EQUATOR_RADIUS = 6378137

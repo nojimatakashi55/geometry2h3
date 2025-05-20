@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geometry2h3"
+version = "0.0.0"
+description = "Convert various geometry to H3 cells"
+authors = [{ name = "Takashi Nojima" }]
+license = "MIT"
+
+[tool.setuptools.packages.find]
+where = ["."]
