@@ -10,16 +10,18 @@ class CenterRadiusShape(Polygon):
         self.lon = lon
         self.radius_meter = radius_meter
 
-        coords = self.__polygon().exterior.coords
+    def __new__(cls, lat, lon, radius_meter):
+        buffer_distance = cls.__buffer_distance(lat, lon, radius_meter)
+        polygon = Point(lon, lat).buffer(buffer_distance)
 
-        super().__init__(coords)
+        return super().__new__(cls, polygon.exterior.coords)
 
-    def __polygon(self):
-        d = (360 * 1000) / (2 * math.pi * (EQUATOR_RADIUS * math.cos(self.lat * math.pi / 180.0))) / 1000.0
-        buffer_distance = d * self.radius_meter
-        polygon = Point(self.lon, self.lat).buffer(buffer_distance)
+    @classmethod
+    def __buffer_distance(cls, lat, lon, radius_meter):
+        d = (360 * 1000) / (2 * math.pi * (EQUATOR_RADIUS * math.cos(lat * math.pi / 180.0))) / 1000.0
+        buffer_distance = d * radius_meter
 
-        return polygon
+        return buffer_distance
 
     def __repr__(self):
         poly_repr = super().__repr__()

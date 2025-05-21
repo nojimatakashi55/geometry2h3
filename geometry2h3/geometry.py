@@ -64,9 +64,9 @@ class Geometry(object):
         except Exception as e:
             raise ValueError(f"Failed to set geojson geometry: {e}")
 
-    def set_bbox(self, minx, miny, maxx, maxy, append=False):
+    def set_bbox(self, min_lat, min_lon, max_lat, max_lon, append=False):
         try:
-            geom = box(minx, miny, maxx, maxy)
+            geom = box(min_lon, min_lat, max_lon, max_lat)
             self.set_shapely(geom, append)
 
         except Exception as e:

@@ -6,9 +6,11 @@ class PolylineShape(LineString):
     def __init__(self, encoded_str):
         self.encoded_str = encoded_str
 
-        coords = polyline.decode(encoded_str)
+    def __new__(cls, encoded_str):
+        coords_latlon = polyline.decode(encoded_str)
+        coords_lonlat = list(map(lambda x : (x[1], x[0]), coords_latlon))
 
-        super().__init__(coords)
+        return super().__new__(cls, coords_lonlat)
 
     def __repr__(self):
         poly_repr = super().__repr__()
