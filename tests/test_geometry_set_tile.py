@@ -14,3 +14,17 @@ def test_geometry_set_tile():
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
     assert len(g.h3_set) > 0
+
+@pytest.mark.parametrize(
+    ["z", "x", "y"],
+    [
+        (None, None, None),
+        ("a", "b", "c")
+    ]
+)
+def test_geometry_set_tile_bad_input(z, x, y):
+    g = Geometry(h3_resolution=7)
+
+    with pytest.raises(Exception):
+        g.set_tile(z, x, y)
+        g.fill_h3()

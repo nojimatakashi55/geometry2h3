@@ -33,11 +33,8 @@ class Geometry(object):
 
     def set_shapely(self, shapely_geom, append=False):
         try:
-            if not isinstance(shapely_geom, BaseGeometry):
-                raise TypeError("Invalid shapely geometry instance")
-
-            if not shapely_geom.is_valid:
-                raise ValueError("Invalid shapely geometry")
+            if not isinstance(shapely_geom, BaseGeometry) or not shapely_geom.is_valid or shapely_geom.is_empty:
+                raise ValueError("Invalid shapely geometry instance")
 
             if append:
                 self.geoms.append(shapely_geom)
@@ -45,8 +42,8 @@ class Geometry(object):
             else:
                 self.geoms = [shapely_geom]
 
-        except Exception as e:
-            raise type(e)(f"Failed to set shapely geometry: {e}")
+        except ValueError as e:
+            raise ValueError(f"Failed to set shapely geometry: {e}")
 
     def set_wkt(self, wkt_str, append=False):
         try:
@@ -66,6 +63,12 @@ class Geometry(object):
 
     def set_bbox(self, min_lat, min_lon, max_lat, max_lon, append=False):
         try:
+            if min_lat >= max_lat:
+                raise ValueError("min_lat must be strictly less than max_lat")
+
+            if min_lon >= max_lon:
+                raise ValueError("min_lon must be strictly less than max_lon")
+
             geom = box(min_lon, min_lat, max_lon, max_lat)
             self.set_shapely(geom, append)
 

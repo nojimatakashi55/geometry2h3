@@ -12,3 +12,11 @@ def test_geometry_set_wkt():
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
     assert len(g.h3_set) > 0
+
+@pytest.mark.parametrize("wkt", ["", "???", None])
+def test_geometry_set_wkt_bad_input(wkt):
+    g = Geometry(h3_resolution=7)
+
+    with pytest.raises(Exception):
+        g.set_wkt(wkt)
+        g.fill_h3()

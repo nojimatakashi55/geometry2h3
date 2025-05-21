@@ -14,3 +14,17 @@ def test_geometry_set_center_radius():
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
     assert len(g.h3_set) > 0
+
+@pytest.mark.parametrize(
+    ["lat", "lon", "radius_meter"],
+    [
+        (None, None, None),
+        ("a", "b", "c")
+    ]
+)
+def test_geometry_set_center_radius_bad_input(lat, lon, radius_meter):
+    g = Geometry(h3_resolution=7)
+
+    with pytest.raises(Exception):
+        g.set_tile(lat, lon, radius_meter)
+        g.fill_h3()

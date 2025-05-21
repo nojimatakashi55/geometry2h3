@@ -41,3 +41,11 @@ def test_geometry_set_polyline():
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "LineString"
     assert len(g.h3_set) > 0
+
+@pytest.mark.parametrize("encoded_str", ["", "abc", None])
+def test_geometry_set_polyline_bad_input(encoded_str):
+    g = Geometry(h3_resolution=7)
+
+    with pytest.raises(Exception):
+        g.set_polyline(encoded_str)
+        g.fill_h3()
