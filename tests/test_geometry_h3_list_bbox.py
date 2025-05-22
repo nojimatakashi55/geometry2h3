@@ -11,10 +11,13 @@ def test_geometry_list_bbox():
     g = GeometryH3(h3_resolution=7)
     g.set_bbox(min_lat, min_lon, max_lat, max_lon)
     g.fill_h3()
+    g.build_h3_strtree()
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
     assert len(g.h3_list) > 0
+    assert g.h3_strtree is not None
+    assert len(g.h3_strtree.geometries) > 0
 
 @pytest.mark.parametrize(
     ["min_lat", "min_lon", "max_lat", "max_lon"],
@@ -31,3 +34,4 @@ def test_geometry_list_bbox_bad_input(min_lat, min_lon, max_lat, max_lon):
     with pytest.raises(ValueError):
         g.set_bbox(min_lat, min_lon, max_lat, max_lon)
         g.fill_h3()
+        g.build_h3_strtree()

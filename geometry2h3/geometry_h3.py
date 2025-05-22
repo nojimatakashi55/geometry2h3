@@ -1,6 +1,6 @@
 # coding:utf-8
 from shapely.geometry.base import BaseGeometry
-from shapely import wkt
+from shapely import wkt, STRtree
 from shapely.geometry import shape, box, mapping, Polygon, Point
 import h3
 import functools
@@ -23,13 +23,15 @@ class GeometryH3(object):
         self.h3_resolution = h3_resolution
         self.polygon_h3_contain = polygon_h3_contain if polygon_h3_contain in POLYGON_H3_CONTAIN_SET else "overlap"
         self.geoms = []
-        self.h3_list = list()
+        self.h3_list = []
+        self.h3_strtree = None
 
     def __repr__(self):
         geom_types = list(map(lambda x : x.geom_type, self.geoms))
         h3_cells_count = len(self.h3_list)
+        h3_strtree_count = len(self.h3_strtree.geometries) if self.h3_strtree is not None else 0
 
-        return f"<GeometryH3(h3_resolution={self.h3_resolution}, polygon_h3_contain={self.polygon_h3_contain}, geom_types={geom_types}, h3_cells_count={h3_cells_count})>"
+        return f"<GeometryH3(h3_resolution={self.h3_resolution}, polygon_h3_contain={self.polygon_h3_contain}, geom_types={geom_types}, h3_cells_count={h3_cells_count}, h3_strtree_count={h3_strtree_count})>"
 
     def set_shapely(self, shapely_geom, append=False):
         try:
@@ -201,7 +203,19 @@ class GeometryH3(object):
         return h3_set
 
     def fill_h3(self):
-        h3_set = self.__h3_fill_geoms(self.geoms)
+        h3_set_iter = map(lambda x : self.__h3_fill_geom(x), self.geoms)
+        h3_set = functools.reduce(lambda x1,x2 : x1 | x2, h3_set_iter, set())
         self.h3_list = list(h3_set)
 
         return self.h3_list
+
+    def build_h3_strtree(self):
+        if len(self.h3_list) == 0:
+            return None
+
+        h3_boundary_iter = map(lambda x : h3.cell_to_boundary(x), self.h3_list)
+        h3_boundary_iter = map(lambda x : Polygon(map(lambda y : (y[1], y[0]), x)), h3_boundary_iter)
+        h3_boundary_list = list(h3_boundary_iter)
+        self.h3_strtree = STRtree(h3_boundary_list)
+
+        return self.h3_strtree

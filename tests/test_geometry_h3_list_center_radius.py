@@ -10,10 +10,13 @@ def test_geometry_list_center_radius():
     g = GeometryH3(h3_resolution=7)
     g.set_center_radius(lat, lon, radius_meter)
     g.fill_h3()
+    g.build_h3_strtree()
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
     assert len(g.h3_list) > 0
+    assert g.h3_strtree is not None
+    assert len(g.h3_strtree.geometries) > 0
 
 @pytest.mark.parametrize(
     ["lat", "lon", "radius_meter"],
@@ -28,3 +31,4 @@ def test_geometry_list_center_radius_bad_input(lat, lon, radius_meter):
     with pytest.raises(Exception):
         g.set_tile(lat, lon, radius_meter)
         g.fill_h3()
+        g.build_h3_strtree()

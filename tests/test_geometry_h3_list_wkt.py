@@ -8,10 +8,13 @@ def test_geometry_list_wkt():
     g = GeometryH3(h3_resolution=7)
     g.set_wkt(wkt)
     g.fill_h3()
+    g.build_h3_strtree()
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
     assert len(g.h3_list) > 0
+    assert g.h3_strtree is not None
+    assert len(g.h3_strtree.geometries) > 0
 
 @pytest.mark.parametrize("wkt", ["", "???", None])
 def test_geometry_list_wkt_bad_input(wkt):
@@ -20,3 +23,4 @@ def test_geometry_list_wkt_bad_input(wkt):
     with pytest.raises(Exception):
         g.set_wkt(wkt)
         g.fill_h3()
+        g.build_h3_strtree()

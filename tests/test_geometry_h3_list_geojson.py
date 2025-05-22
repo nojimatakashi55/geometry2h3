@@ -49,10 +49,13 @@ def test_geometry_list_geojson():
     g = GeometryH3(h3_resolution=7)
     g.set_geojson(geojson)
     g.fill_h3()
+    g.build_h3_strtree()
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
     assert len(g.h3_list) > 0
+    assert g.h3_strtree is not None
+    assert len(g.h3_strtree.geometries) > 0
 
 @pytest.mark.parametrize("geojson", [{}, list(), set(), None])
 def test_geometry_list_geojson_bad_input(geojson):
@@ -61,3 +64,4 @@ def test_geometry_list_geojson_bad_input(geojson):
     with pytest.raises(Exception):
         g.set_geojson(geojson)
         g.fill_h3()
+        g.build_h3_strtree()

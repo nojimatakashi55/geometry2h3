@@ -37,10 +37,13 @@ def test_geometry_list_polyline():
     g = GeometryH3(h3_resolution=7)
     g.set_polyline(encoded_str)
     g.fill_h3()
+    g.build_h3_strtree()
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "LineString"
     assert len(g.h3_list) > 0
+    assert g.h3_strtree is not None
+    assert len(g.h3_strtree.geometries) > 0
 
 @pytest.mark.parametrize("encoded_str", ["", "abc", None])
 def test_geometry_list_polyline_bad_input(encoded_str):
@@ -49,3 +52,4 @@ def test_geometry_list_polyline_bad_input(encoded_str):
     with pytest.raises(Exception):
         g.set_polyline(encoded_str)
         g.fill_h3()
+        g.build_h3_strtree()

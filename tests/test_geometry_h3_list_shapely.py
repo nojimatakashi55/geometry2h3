@@ -202,10 +202,13 @@ def run_set_shapely(geom, geom_type):
     g = GeometryH3(h3_resolution=7)
     g.set_shapely(geom)
     g.fill_h3()
+    g.build_h3_strtree()
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == geom_type
     assert len(g.h3_list) > 0
+    assert g.h3_strtree is not None
+    assert len(g.h3_strtree.geometries) > 0
 
 def test_set_shapely_point():
     run_set_shapely(point, "Point")
@@ -237,15 +240,18 @@ def test_set_shapely_invalid_type():
     with pytest.raises(ValueError):
         g.set_shapely("not a shapely object")
         g.fill_h3()
+        g.build_h3_strtree()
 
 def test_set_shapely_append_behavior():
     g = GeometryH3(h3_resolution=7)
     g.set_shapely(Point(139.7, 35.6))
     g.set_shapely(Point(135.0, 34.0), append=True)
     g.fill_h3()
+    g.build_h3_strtree()
 
     assert len(g.geoms) == 2
     assert len(g.h3_list) > 0
+    assert len(g.h3_strtree.geometries) > 0
 
 def test_set_shapely_invalid_geometry():
     g = GeometryH3(h3_resolution=7)
@@ -254,6 +260,7 @@ def test_set_shapely_invalid_geometry():
     with pytest.raises(ValueError):
         g.set_shapely(bad_poly)
         g.fill_h3()
+        g.build_h3_strtree()
 
 @pytest.mark.parametrize("geom", ["", None])
 def test_geometry_list_shapely_input(geom):
@@ -262,3 +269,4 @@ def test_geometry_list_shapely_input(geom):
     with pytest.raises(ValueError):
         g.set_shapely(geom)
         g.fill_h3()
+        g.build_h3_strtree()
