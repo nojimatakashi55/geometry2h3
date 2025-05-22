@@ -45,18 +45,18 @@ def test_fill_h3_from_shapely():
         ]]
     )
 
-    h3_set = api.fill_h3_from_shapely(shape, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_list = api.fill_h3_from_shapely(shape, h3_resolution=7, polygon_h3_contain="overlap")
 
-    assert isinstance(h3_set, set)
-    assert len(h3_set) > 0
+    assert isinstance(h3_list, list)
+    assert len(h3_list) > 0
 
 def test_fill_h3_from_wkt():
     wkt = "POLYGON ((139.728553 35.6197, 139.723444 35.626446, 139.715828 35.633998, 139.710106 35.64669, 139.6993714 35.6586161, 139.702687 35.670168, 139.7020716 35.68304384, 139.6986016 35.68844644, 139.700044 35.701306, 139.703782 35.712285, 139.706587 35.721204, 139.71038 35.728926, 139.729329 35.73159, 139.739345 35.733492, 139.746875 35.736489, 139.76086 35.738062, 139.766787 35.732135, 139.770987 35.727772, 139.778837 35.720495, 139.777254 35.713768, 139.7733663 35.70796362, 139.774219 35.698683, 139.770883 35.69169, 139.766084 35.681382, 139.763328 35.675069, 139.75964 35.665498, 139.756749 35.655646, 139.747575 35.645736, 139.7407 35.6355, 139.74044 35.630152, 139.728553 35.6197))"
 
-    h3_set = api.fill_h3_from_wkt(wkt, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_list = api.fill_h3_from_wkt(wkt, h3_resolution=7, polygon_h3_contain="overlap")
 
-    assert isinstance(h3_set, set)
-    assert len(h3_set) > 0
+    assert isinstance(h3_list, list)
+    assert len(h3_list) > 0
 
 def test_fill_h3_from_geojson():
     geojson = {
@@ -102,10 +102,10 @@ def test_fill_h3_from_geojson():
         ]
     }
 
-    h3_set = api.fill_h3_from_geojson(geojson, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_list = api.fill_h3_from_geojson(geojson, h3_resolution=7, polygon_h3_contain="overlap")
 
-    assert isinstance(h3_set, set)
-    assert len(h3_set) > 0
+    assert isinstance(h3_list, list)
+    assert len(h3_list) > 0
 
 def test_fill_h3_from_polyline():
     coords = [
@@ -138,20 +138,20 @@ def test_fill_h3_from_polyline():
     ]
     encoded_str = polyline.encode(coords)
 
-    h3_set = api.fill_h3_from_polyline(encoded_str, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_list = api.fill_h3_from_polyline(encoded_str, h3_resolution=7, polygon_h3_contain="overlap")
 
-    assert isinstance(h3_set, set)
-    assert len(h3_set) > 0
+    assert isinstance(h3_list, list)
+    assert len(h3_list) > 0
 
 def test_fill_h3_from_tile():
     z = 9
     x = 452
     y = 199
 
-    h3_set = api.fill_h3_from_tile(z, x, y, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_list = api.fill_h3_from_tile(z, x, y, h3_resolution=7, polygon_h3_contain="overlap")
 
-    assert isinstance(h3_set, set)
-    assert len(h3_set) > 0
+    assert isinstance(h3_list, list)
+    assert len(h3_list) > 0
 
 def test_fill_h3_from_bbox():
     min_lat = 35.6197
@@ -159,17 +159,17 @@ def test_fill_h3_from_bbox():
     max_lat = 35.738062
     max_lon = 139.778837
 
-    h3_set = api.fill_h3_from_bbox(min_lat, min_lon, max_lat, max_lon, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_list = api.fill_h3_from_bbox(min_lat, min_lon, max_lat, max_lon, h3_resolution=7, polygon_h3_contain="overlap")
 
-    assert isinstance(h3_set, set)
-    assert len(h3_set) > 0
+    assert isinstance(h3_list, list)
+    assert len(h3_list) > 0
 
 def test_fill_h3_from_center_radius():
     lat = 36.69894001299462
     lon = 138.31282262004888
     radius_meter = 10000
 
-    h3_set = api.fill_h3_from_center_radius(lat, lon, radius_meter, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_list = api.fill_h3_from_center_radius(lat, lon, radius_meter, h3_resolution=7, polygon_h3_contain="overlap")
 
-    assert isinstance(h3_set, set)
-    assert len(h3_set) > 0
+    assert isinstance(h3_list, list)
+    assert len(h3_list) > 0

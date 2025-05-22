@@ -1,9 +1,9 @@
-# tests/test_geometry_set_wkt.py
+# tests/test_geometry_list_wkt.py
 import pytest
 import polyline
 from geometry2h3.geometry_h3 import GeometryH3
 
-def test_geometry_set_polyline():
+def test_geometry_list_polyline():
     coords = [
         (35.681382, 139.766084),
         (35.713768, 139.777254),
@@ -40,10 +40,10 @@ def test_geometry_set_polyline():
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "LineString"
-    assert len(g.h3_set) > 0
+    assert len(g.h3_list) > 0
 
 @pytest.mark.parametrize("encoded_str", ["", "abc", None])
-def test_geometry_set_polyline_bad_input(encoded_str):
+def test_geometry_list_polyline_bad_input(encoded_str):
     g = GeometryH3(h3_resolution=7)
 
     with pytest.raises(Exception):

@@ -23,11 +23,11 @@ class GeometryH3(object):
         self.h3_resolution = h3_resolution
         self.polygon_h3_contain = polygon_h3_contain if polygon_h3_contain in POLYGON_H3_CONTAIN_SET else "overlap"
         self.geoms = []
-        self.h3_set = set()
+        self.h3_list = list()
 
     def __repr__(self):
         geom_types = list(map(lambda x : x.geom_type, self.geoms))
-        h3_cells_count = len(self.h3_set)
+        h3_cells_count = len(self.h3_list)
 
         return f"<GeometryH3(h3_resolution={self.h3_resolution}, polygon_h3_contain={self.polygon_h3_contain}, geom_types={geom_types}, h3_cells_count={h3_cells_count})>"
 
@@ -201,6 +201,7 @@ class GeometryH3(object):
         return h3_set
 
     def fill_h3(self):
-        self.h3_set = self.__h3_fill_geoms(self.geoms)
+        h3_set = self.__h3_fill_geoms(self.geoms)
+        self.h3_list = list(h3_set)
 
-        return self.h3_set
+        return self.h3_list

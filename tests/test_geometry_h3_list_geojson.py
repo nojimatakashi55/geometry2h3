@@ -1,8 +1,8 @@
-# tests/test_geometry_set_wkt.py
+# tests/test_geometry_list_wkt.py
 import pytest
 from geometry2h3.geometry_h3 import GeometryH3
 
-def test_geometry_set_geojson():
+def test_geometry_list_geojson():
     geojson = {
         "type": "Polygon",
         "coordinates": [
@@ -52,10 +52,10 @@ def test_geometry_set_geojson():
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
-    assert len(g.h3_set) > 0
+    assert len(g.h3_list) > 0
 
 @pytest.mark.parametrize("geojson", [{}, list(), set(), None])
-def test_geometry_set_geojson_bad_input(geojson):
+def test_geometry_list_geojson_bad_input(geojson):
     g = GeometryH3(h3_resolution=7)
 
     with pytest.raises(Exception):

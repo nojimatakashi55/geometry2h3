@@ -1,8 +1,8 @@
-# tests/test_geometry_set_wkt.py
+# tests/test_geometry_list_wkt.py
 import pytest
 from geometry2h3.geometry_h3 import GeometryH3
 
-def test_geometry_set_tile():
+def test_geometry_list_tile():
     z = 9
     x = 452
     y = 199
@@ -13,7 +13,7 @@ def test_geometry_set_tile():
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == "Polygon"
-    assert len(g.h3_set) > 0
+    assert len(g.h3_list) > 0
 
 @pytest.mark.parametrize(
     ["z", "x", "y"],
@@ -22,7 +22,7 @@ def test_geometry_set_tile():
         ("a", "b", "c")
     ]
 )
-def test_geometry_set_tile_bad_input(z, x, y):
+def test_geometry_list_tile_bad_input(z, x, y):
     g = GeometryH3(h3_resolution=7)
 
     with pytest.raises(Exception):

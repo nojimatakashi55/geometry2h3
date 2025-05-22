@@ -1,4 +1,4 @@
-# tests/test_geometry_set_shapely.py
+# tests/test_geometry_list_shapely.py
 import pytest
 from shapely.geometry import Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection
 from geometry2h3.geometry_h3 import GeometryH3
@@ -205,7 +205,7 @@ def run_set_shapely(geom, geom_type):
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == geom_type
-    assert len(g.h3_set) > 0
+    assert len(g.h3_list) > 0
 
 def test_set_shapely_point():
     run_set_shapely(point, "Point")
@@ -245,7 +245,7 @@ def test_set_shapely_append_behavior():
     g.fill_h3()
 
     assert len(g.geoms) == 2
-    assert len(g.h3_set) > 0
+    assert len(g.h3_list) > 0
 
 def test_set_shapely_invalid_geometry():
     g = GeometryH3(h3_resolution=7)
@@ -256,7 +256,7 @@ def test_set_shapely_invalid_geometry():
         g.fill_h3()
 
 @pytest.mark.parametrize("geom", ["", None])
-def test_geometry_set_shapely_input(geom):
+def test_geometry_list_shapely_input(geom):
     g = GeometryH3(h3_resolution=7)
 
     with pytest.raises(ValueError):
