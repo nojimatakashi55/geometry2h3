@@ -1,13 +1,13 @@
 # tests/test_geometry_set_wkt.py
 import pytest
-from geometry2h3.geometry import Geometry
+from geometry2h3.geometry_h3 import GeometryH3
 
 def test_geometry_set_tile():
     z = 9
     x = 452
     y = 199
 
-    g = Geometry(h3_resolution=7)
+    g = GeometryH3(h3_resolution=7)
     g.set_tile(z, x, y)
     g.fill_h3()
 
@@ -23,7 +23,7 @@ def test_geometry_set_tile():
     ]
 )
 def test_geometry_set_tile_bad_input(z, x, y):
-    g = Geometry(h3_resolution=7)
+    g = GeometryH3(h3_resolution=7)
 
     with pytest.raises(Exception):
         g.set_tile(z, x, y)

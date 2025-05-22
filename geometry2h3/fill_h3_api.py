@@ -1,8 +1,8 @@
 # coding:utf-8
-from geometry2h3.geometry import Geometry
+from geometry2h3.geometry_h3 import GeometryH3
 
 def _fill_h3_from(func, *args, h3_resolution, polygon_h3_contain):
-    g = Geometry(h3_resolution, polygon_h3_contain)
+    g = GeometryH3(h3_resolution, polygon_h3_contain)
     func(g, *args)
 
     return g.fill_h3()

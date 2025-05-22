@@ -1,7 +1,7 @@
 # tests/test_geometry_set_wkt.py
 import pytest
 import polyline
-from geometry2h3.geometry import Geometry
+from geometry2h3.geometry_h3 import GeometryH3
 
 def test_geometry_set_polyline():
     coords = [
@@ -34,7 +34,7 @@ def test_geometry_set_polyline():
     ]
 
     encoded_str = polyline.encode(coords)
-    g = Geometry(h3_resolution=7)
+    g = GeometryH3(h3_resolution=7)
     g.set_polyline(encoded_str)
     g.fill_h3()
 
@@ -44,7 +44,7 @@ def test_geometry_set_polyline():
 
 @pytest.mark.parametrize("encoded_str", ["", "abc", None])
 def test_geometry_set_polyline_bad_input(encoded_str):
-    g = Geometry(h3_resolution=7)
+    g = GeometryH3(h3_resolution=7)
 
     with pytest.raises(Exception):
         g.set_polyline(encoded_str)

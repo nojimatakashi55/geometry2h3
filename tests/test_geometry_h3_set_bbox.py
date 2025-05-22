@@ -1,6 +1,6 @@
 # tests/test_geometry_set_wkt.py
 import pytest
-from geometry2h3.geometry import Geometry
+from geometry2h3.geometry_h3 import GeometryH3
 
 def test_geometry_set_bbox():
     min_lat = 35.6197
@@ -8,7 +8,7 @@ def test_geometry_set_bbox():
     max_lat = 35.738062
     max_lon = 139.778837
 
-    g = Geometry(h3_resolution=7)
+    g = GeometryH3(h3_resolution=7)
     g.set_bbox(min_lat, min_lon, max_lat, max_lon)
     g.fill_h3()
 
@@ -26,7 +26,7 @@ def test_geometry_set_bbox():
     ]
 )
 def test_geometry_set_bbox_bad_input(min_lat, min_lon, max_lat, max_lon):
-    g = Geometry(h3_resolution=7)
+    g = GeometryH3(h3_resolution=7)
 
     with pytest.raises(ValueError):
         g.set_bbox(min_lat, min_lon, max_lat, max_lon)

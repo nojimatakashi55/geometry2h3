@@ -18,7 +18,7 @@ POLYGON_H3_CONTAIN_SET = {
     "outline_overlap",  # h3 is partially contained in outline
 }
 
-class Geometry(object):
+class GeometryH3(object):
     def __init__(self, h3_resolution, polygon_h3_contain="overlap"):
         self.h3_resolution = h3_resolution
         self.polygon_h3_contain = polygon_h3_contain if polygon_h3_contain in POLYGON_H3_CONTAIN_SET else "overlap"
@@ -29,7 +29,7 @@ class Geometry(object):
         geom_types = list(map(lambda x : x.geom_type, self.geoms))
         h3_cells_count = len(self.h3_set)
 
-        return f"<Geometry(h3_resolution={self.h3_resolution}, polygon_h3_contain={self.polygon_h3_contain}, geom_types={geom_types}, h3_cells_count={h3_cells_count})>"
+        return f"<GeometryH3(h3_resolution={self.h3_resolution}, polygon_h3_contain={self.polygon_h3_contain}, geom_types={geom_types}, h3_cells_count={h3_cells_count})>"
 
     def set_shapely(self, shapely_geom, append=False):
         try:

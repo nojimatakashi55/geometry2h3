@@ -1,6 +1,6 @@
 # tests/test_geometry_set_wkt.py
 import pytest
-from geometry2h3.geometry import Geometry
+from geometry2h3.geometry_h3 import GeometryH3
 
 def test_geometry_set_geojson():
     geojson = {
@@ -46,7 +46,7 @@ def test_geometry_set_geojson():
         ]
     }
 
-    g = Geometry(h3_resolution=7)
+    g = GeometryH3(h3_resolution=7)
     g.set_geojson(geojson)
     g.fill_h3()
 
@@ -56,7 +56,7 @@ def test_geometry_set_geojson():
 
 @pytest.mark.parametrize("geojson", [{}, list(), set(), None])
 def test_geometry_set_geojson_bad_input(geojson):
-    g = Geometry(h3_resolution=7)
+    g = GeometryH3(h3_resolution=7)
 
     with pytest.raises(Exception):
         g.set_geojson(geojson)
