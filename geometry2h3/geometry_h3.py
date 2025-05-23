@@ -1,7 +1,7 @@
 # coding:utf-8
 from shapely.geometry.base import BaseGeometry
-from shapely import wkt, STRtree
-from shapely.geometry import shape, box, mapping, Polygon, Point
+from shapely.geometry import box, mapping, Polygon, Point
+from shapely import STRtree
 import h3
 import functools
 import itertools
@@ -197,6 +197,15 @@ class GeometryH3(object):
         except ValueError as e:
             raise ValueError(f"Failed to h3 strtree query shapely: {e}")
 
+    def h3_strtree_query_location(self, lat, lon, predicate=None, distance=None):
+        try:
+            geom = Point(lon, lat)
+
+            return self.h3_strtree_query_shapely(geom, predicate=predicate, distance=distance)
+
+        except ValueError as e:
+            raise ValueError(f"Failed to h3 strtree query location: {e}")
+
     def h3_strtree_query_nearest_shapely(self, shapely_geom, max_distance=None, return_distance=False, exclusive=False, all_matches=True):
         try:
             if self.h3_strtree is None:
@@ -223,3 +232,12 @@ class GeometryH3(object):
 
         except ValueError as e:
             raise ValueError(f"Failed to h3 strtree query nearest shapely: {e}")
+
+    def h3_strtree_query_nearest_location(self, lat, lon, max_distance=None, return_distance=False, exclusive=False, all_matches=True):
+        try:
+            geom = Point(lon, lat)
+
+            return self.h3_strtree_query_nearest_shapely(geom, max_distance=max_distance, return_distance=return_distance, exclusive=exclusive, all_matches=all_matches)
+
+        except ValueError as e:
+            raise ValueError(f"Failed to h3 strtree query nearest location: {e}")
