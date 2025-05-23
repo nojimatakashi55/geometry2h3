@@ -6,10 +6,6 @@ import h3
 import functools
 import itertools
 
-from geometry2h3.polyline_shape import PolylineShape
-from geometry2h3.tile_shape import TileShape
-from geometry2h3.center_radius_shape import CenterRadiusShape
-
 POLYGON_H3_CONTAIN_SET = {
     "overlap",          # h3 is partially contained in shape
     "center",           # h3 center is contained in shape
@@ -46,60 +42,6 @@ class GeometryH3(object):
 
         except ValueError as e:
             raise ValueError(f"Failed to set shapely geometry: {e}")
-
-    def set_wkt(self, wkt_str, append=False):
-        try:
-            geom = wkt.loads(wkt_str)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Failed to set WKT geometry: {e}")
-
-    def set_geojson(self, geojson_dict, append=False):
-        try:
-            geom = shape(geojson_dict)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Failed to set geojson geometry: {e}")
-
-    def set_bbox(self, min_lat, min_lon, max_lat, max_lon, append=False):
-        try:
-            if min_lat >= max_lat:
-                raise ValueError("min_lat must be strictly less than max_lat")
-
-            if min_lon >= max_lon:
-                raise ValueError("min_lon must be strictly less than max_lon")
-
-            geom = box(min_lon, min_lat, max_lon, max_lat)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Failed to set box geometry: {e}")
-
-    def set_polyline(self, encoded_str, append=False):
-        try:
-            geom = PolylineShape(encoded_str)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Failed to set polyline geometry: {e}")
-
-    def set_tile(self, z, x, y, append=False):
-        try:
-            geom = TileShape(z, x, y)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Failed to set tile geometry: {e}")
-
-    def set_center_radius(self, lat, lon, radius_meter, append=False):
-        try:
-            geom = CenterRadiusShape(lat, lon, radius_meter)
-            self.set_shapely(geom, append)
-
-        except Exception as e:
-            raise ValueError(f"Failed to set center radius geometry: {e}")
 
     def __h3_point_geom(self, point_geom):
         return {
@@ -219,3 +161,65 @@ class GeometryH3(object):
         self.h3_strtree = STRtree(h3_boundary_list)
 
         return self.h3_strtree
+
+    def h3_strtree_nearest_shapely(self, shapely_geom):
+        try:
+            if self.h3_strtree is None:
+                return None
+
+            nearest_idx = self.h3_strtree.nearest(shapely_geom)
+            nearest_h3 = self.h3_list[nearest_idx]
+
+            return nearest_h3
+
+        except ValueError as e:
+            raise ValueError(f"Failed to h3 strtree nearest shapely: {e}")
+
+    def h3_strtree_nearest_location(self, lat, lon):
+        try:
+            geom = Point(lon, lat)
+
+            return self.h3_strtree_nearest_shapely(geom)
+
+        except ValueError as e:
+            raise ValueError(f"Failed to h3 strtree nearest location: {e}")
+
+    def h3_strtree_query_shapely(self, shapely_geom, predicate=None, distance=None):
+        try:
+            if self.h3_strtree is None:
+                return None
+
+            idx_list = self.h3_strtree.query(shapely_geom, predicate=predicate, distance=distance).tolist()
+            h3_list = list(map(lambda x : self.h3_list[x], idx_list))
+
+            return h3_list
+
+        except ValueError as e:
+            raise ValueError(f"Failed to h3 strtree query shapely: {e}")
+
+    def h3_strtree_query_nearest_shapely(self, shapely_geom, max_distance=None, return_distance=False, exclusive=False, all_matches=True):
+        try:
+            if self.h3_strtree is None:
+                return None
+
+            is_single_geom = isinstance(shapely_geom, BaseGeometry)
+
+            if return_distance:
+                idxs, distances = self.h3_strtree.query_nearest(shapely_geom, max_distance=max_distance, return_distance=return_distance, exclusive=exclusive, all_matches=all_matches)
+
+                if is_single_geom:
+                    return (self.h3_list[idxs[0]], distances[0])
+
+                else:
+                    h3_iter = map(lambda x : self.h3_list[x], idxs)
+                    h3_distance_list = list(zip(h3_iter, distances))
+
+                    return h3_distance_list
+
+            else:
+                idxs = self.h3_strtree.query_nearest(shapely_geom, max_distance=max_distance, return_distance=return_distance, exclusive=exclusive, all_matches=all_matches)
+
+                return self.h3_list[idxs[0]] if is_single_geom else list(map(lambda x : self.h3_list[x], idxs))
+
+        except ValueError as e:
+            raise ValueError(f"Failed to h3 strtree query nearest shapely: {e}")
