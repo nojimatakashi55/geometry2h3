@@ -47,7 +47,7 @@ def test_build_h3_strtree_from_shapely():
         ]]
     )
 
-    h3_strtree = api.build_h3_strtree_from_shapely(shape, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_shapely(shape, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
@@ -55,7 +55,7 @@ def test_build_h3_strtree_from_shapely():
 def test_build_h3_strtree_from_wkt():
     wkt = "POLYGON ((139.728553 35.6197, 139.723444 35.626446, 139.715828 35.633998, 139.710106 35.64669, 139.6993714 35.6586161, 139.702687 35.670168, 139.7020716 35.68304384, 139.6986016 35.68844644, 139.700044 35.701306, 139.703782 35.712285, 139.706587 35.721204, 139.71038 35.728926, 139.729329 35.73159, 139.739345 35.733492, 139.746875 35.736489, 139.76086 35.738062, 139.766787 35.732135, 139.770987 35.727772, 139.778837 35.720495, 139.777254 35.713768, 139.7733663 35.70796362, 139.774219 35.698683, 139.770883 35.69169, 139.766084 35.681382, 139.763328 35.675069, 139.75964 35.665498, 139.756749 35.655646, 139.747575 35.645736, 139.7407 35.6355, 139.74044 35.630152, 139.728553 35.6197))"
 
-    h3_strtree = api.build_h3_strtree_from_wkt(wkt, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_wkt(wkt, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
@@ -63,7 +63,7 @@ def test_build_h3_strtree_from_wkt():
 def test_build_h3_strtree_from_wkb():
     wkb = b'\x01\x03\x00\x00\x00\x01\x00\x00\x00\x1f\x00\x00\x00\xe3\x8caNPwa@e\xaa`TR\xcfA@\x99\x0f\x08t&wa@\xe2Z\xeda/\xd0A@\xf41\x1f\x10\xe8va@]\xdd\xb1\xd8&\xd1A@0\xd670\xb9va@;S\xe8\xbc\xc6\xd2A@?X!@ava@>\x0fI\x88M\xd4A@a\x8ari|va@\xb1i\xa5\x10\xc8\xd5A@j.\xdc^wva@cD\x05\xfbm\xd7A@\xdd\x1d\xbe\xf1Zva@\x7flP\x03\x1f\xd8A@Z\xb8\xac\xc2fva@\x8a>\x1fe\xc4\xd9A@n0\xd4a\x85va@77\xa6\',\xdbA@\xec\x18W\\\x9cva@H\xdf\xa4iP\xdcA@pw\xd6n\xbbva@ \x9ayrM\xddA@\xc8`\xc5\xa9Vwa@R\n\xba\xbd\xa4\xddA@\xc1n\xd8\xb6\xa8wa@V\xf0\xdb\x10\xe3\xddA@ffff\xe6wa@\x8fn\x84EE\xdeA@\xb5\x1a\x12\xf7Xxa@\xce5\xcc\xd0x\xdeA@\xef\xff\xe3\x84\x89xa@\xe4\xa0\x84\x99\xb6\xddA@\x84\xd4\xed\xec\xabxa@\xe6x\x05\xa2\'\xddA@F}\x92;\xecxa@<\xf7\x1e.9\xdcA@\xed\xd5\xc7C\xdfxa@6w\xf4\xbf\\\xdbA@\x83\xca\xaej\xbfxa@2TI\x8d\x9e\xdaA@#\x9e\xecf\xc6xa@\xb6\xa2\xcdqn\xd9A@[A\xd3\x12\xabxa@1|DL\x89\xd8A@\xa5\xbf\x97\xc2\x83xa@\xa2\n\x7f\x867\xd7A@\xe0\x83\xd7.mxa@\x8f\xc56\xa9h\xd6A@x\x97\x8b\xf8Nxa@\xd6\xc6\xd8\t/\xd5A@\xfc\xc8\xadI7xa@i\xe0G5\xec\xd3A@\xd5\th"\xecwa@\xc8\xec,z\xa7\xd2A@\xb6\x84|\xd0\xb3wa@\xd3Mb\x10X\xd1A@\xcf\x14:\xaf\xb1wa@\'\xc1\x1b\xd2\xa8\xd0A@\xe3\x8caNPwa@e\xaa`TR\xcfA@'
 
-    h3_strtree = api.build_h3_strtree_from_wkb(wkb, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_wkb(wkb, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
@@ -112,7 +112,7 @@ def test_build_h3_strtree_from_geojson_dict():
         ]
     }
 
-    h3_strtree = api.build_h3_strtree_from_geojson_dict(geojson, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_geojson_dict(geojson, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
@@ -162,7 +162,7 @@ def test_build_h3_strtree_from_geojson_str():
     }
     geojson_str = json.dumps(geojson_dict)
 
-    h3_strtree = api.build_h3_strtree_from_geojson_str(geojson_str, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_geojson_str(geojson_str, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
@@ -198,7 +198,7 @@ def test_build_h3_strtree_from_polyline():
     ]
     encoded_str = polyline.encode(coords)
 
-    h3_strtree = api.build_h3_strtree_from_polyline(encoded_str, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_polyline(encoded_str, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
@@ -208,7 +208,7 @@ def test_build_h3_strtree_from_tile():
     x = 452
     y = 199
 
-    h3_strtree = api.build_h3_strtree_from_tile(z, x, y, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_tile(z, x, y, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
@@ -219,7 +219,7 @@ def test_build_h3_strtree_from_bbox():
     max_lat = 35.738062
     max_lon = 139.778837
 
-    h3_strtree = api.build_h3_strtree_from_bbox(min_lat, min_lon, max_lat, max_lon, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_bbox(min_lat, min_lon, max_lat, max_lon, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
@@ -229,7 +229,7 @@ def test_build_h3_strtree_from_center_radius():
     lon = 138.31282262004888
     radius_meter = 10000
 
-    h3_strtree = api.build_h3_strtree_from_center_radius(lat, lon, radius_meter, h3_resolution=7, polygon_h3_contain="overlap")
+    h3_strtree = api.build_h3_strtree_from_center_radius(lat, lon, radius_meter, h3_resolution=7, h3_contain="overlap")
 
     assert isinstance(h3_strtree, STRtree)
     assert len(h3_strtree.geometries) > 0
