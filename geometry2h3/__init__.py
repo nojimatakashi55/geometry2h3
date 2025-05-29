@@ -1,5 +1,5 @@
 # coding:utf-8
-from geometry2h3.shapely_geometry_api import (
+from geometry2h3.to_shapely_api import (
     wkt_to_shapely,
     wkb_to_shapely,
     geojson_dict_to_shapely,
@@ -21,19 +21,13 @@ from geometry2h3.fill_h3_api import (
     fill_h3_from_center_radius,
 )
 
-from geometry2h3.build_h3_strtree_api import (
-    build_h3_strtree_from_wkt,
-    build_h3_strtree_from_wkb,
-    build_h3_strtree_from_geojson_dict,
-    build_h3_strtree_from_geojson_str,
-    build_h3_strtree_from_polyline,
-    build_h3_strtree_from_tile,
-    build_h3_strtree_from_bbox,
-    build_h3_strtree_from_center_radius,
+from geometry2h3.fill_h3_nearest_h3_api import (
+    fill_h3_from_shapely_nearest_h3_shapely,
+    fill_h3_from_shapely_nearest_h3_location,
 )
 
 __all__ = [
-    # shapely_geometry_api
+    # to_shapely_api
     "wkt_to_shapely",
     "wkb_to_shapely",
     "geojson_dict_to_shapely",
@@ -51,13 +45,7 @@ __all__ = [
     "fill_h3_from_tile",
     "fill_h3_from_bbox",
     "fill_h3_from_center_radius",
-    # build_h3_strtree_api
-    "build_h3_strtree_from_wkt",
-    "build_h3_strtree_from_wkb",
-    "build_h3_strtree_from_geojson_dict",
-    "build_h3_strtree_from_geojson_str",
-    "build_h3_strtree_from_polyline",
-    "build_h3_strtree_from_tile",
-    "build_h3_strtree_from_bbox",
-    "build_h3_strtree_from_center_radius",
+    # fill_h3_nearest_h3_api
+    "fill_h3_from_shapely_nearest_h3_shapely",
+    "fill_h3_from_shapely_nearest_h3_location",
 ]

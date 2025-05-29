@@ -1,4 +1,4 @@
-# tests/test_geometry_list_shapely.py
+# tests/test_set_shapely_fill_h3.py
 import pytest
 from shapely.geometry import Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection
 from geometry2h3.geometry_h3 import GeometryH3
@@ -198,75 +198,55 @@ geometrycollection = GeometryCollection([
     polygon1
 ])
 
-def run_set_shapely(geom, geom_type):
+@pytest.mark.parametrize(
+    ["geom", "geom_type"],
+    [
+        (point, "Point"),
+        (linestring1, "LineString"),
+        (linearring, "LinearRing"),
+        (polygon1, "Polygon"),
+        (multipoint, "MultiPoint"),
+        (multilinestring, "MultiLineString"),
+        (multipolygon, "MultiPolygon"),
+        (geometrycollection, "GeometryCollection"),
+    ]
+)
+def test_set_shapely_fill_h3(geom, geom_type):
     g = GeometryH3(h3_resolution=7)
     g.set_shapely(geom)
     g.fill_h3()
-    g.build_h3_strtree()
 
     assert len(g.geoms) == 1
     assert g.geoms[0].geom_type == geom_type
     assert len(g.h3_list) > 0
-    assert g.h3_strtree is not None
-    assert len(g.h3_strtree.geometries) > 0
-
-def test_set_shapely_point():
-    run_set_shapely(point, "Point")
-
-def test_set_shapely_linestring():
-    run_set_shapely(linestring1, "LineString")
-
-def test_set_shapely_linering():
-    run_set_shapely(linearring, "LinearRing")
-
-def test_set_shapely_polygon():
-    run_set_shapely(polygon1, "Polygon")
-
-def test_set_shapely_multipoint():
-    run_set_shapely(multipoint, "MultiPoint")
-
-def test_set_shapely_multilinestring():
-    run_set_shapely(multilinestring, "MultiLineString")
-
-def test_set_shapely_multipolygon():
-    run_set_shapely(multipolygon, "MultiPolygon")
-
-def test_set_shapely_geometrycollection():
-    run_set_shapely(geometrycollection, "GeometryCollection")
+    assert len(g.h3_set_outline) > 0
 
 def test_set_shapely_invalid_type():
-    g = GeometryH3(h3_resolution=7)
-
     with pytest.raises(ValueError):
+        g = GeometryH3(h3_resolution=7)
         g.set_shapely("not a shapely object")
         g.fill_h3()
-        g.build_h3_strtree()
 
 def test_set_shapely_append_behavior():
     g = GeometryH3(h3_resolution=7)
     g.set_shapely(Point(139.7, 35.6))
     g.set_shapely(Point(135.0, 34.0), append=True)
     g.fill_h3()
-    g.build_h3_strtree()
 
     assert len(g.geoms) == 2
     assert len(g.h3_list) > 0
-    assert len(g.h3_strtree.geometries) > 0
+    assert len(g.h3_set_outline) > 0
 
 def test_set_shapely_invalid_geometry():
-    g = GeometryH3(h3_resolution=7)
-    bad_poly = Polygon([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)])
-
     with pytest.raises(ValueError):
+        g = GeometryH3(h3_resolution=7)
+        bad_poly = Polygon([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)])
         g.set_shapely(bad_poly)
         g.fill_h3()
-        g.build_h3_strtree()
 
 @pytest.mark.parametrize("geom", ["", None])
 def test_geometry_list_shapely_input(geom):
-    g = GeometryH3(h3_resolution=7)
-
     with pytest.raises(ValueError):
+        g = GeometryH3(h3_resolution=7)
         g.set_shapely(geom)
         g.fill_h3()
-        g.build_h3_strtree()

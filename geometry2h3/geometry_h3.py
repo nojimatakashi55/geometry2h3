@@ -1,7 +1,6 @@
 # coding:utf-8
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry import box, mapping, Polygon, Point
-from shapely import STRtree
 import h3
 import functools
 import itertools
@@ -27,14 +26,14 @@ class GeometryH3(object):
         self.h3_resolution = h3_resolution
         self.geoms = []
         self.h3_list = []
-        self.h3_strtree = None
+        self.h3_set_outline = set()
 
     def __repr__(self):
-        geom_types = list(map(lambda x : x.geom_type, self.geoms))
-        h3_cells_count = len(self.h3_list)
-        h3_strtree_count = len(self.h3_strtree.geometries) if self.h3_strtree is not None else 0
+        num_geoms = len(self.geoms)
+        num_h3_cells = len(self.h3_list)
+        num_h3_cells_outline = len(self.h3_set_outline)
 
-        return f"<GeometryH3(h3_resolution={self.h3_resolution}, geom_types={geom_types}, h3_cells_count={h3_cells_count}, h3_strtree_count={h3_strtree_count})>"
+        return f"<GeometryH3(h3_resolution={self.h3_resolution}, #geoms={num_geoms}, #h3_cells={num_h3_cells}, #h3_cells_outline={num_h3_cells_outline})>"
 
     def set_shapely(self, shapely_geom, append=False):
         try:
@@ -134,100 +133,47 @@ class GeometryH3(object):
 
         return h3_set
 
+    def __h3_set_outline(self, geoms, h3_set):
+        outline_h3_set = self.__h3_set_geoms(geoms, "outline")
+        expand_outline_h3_set = outline_h3_set & h3_set
+
+        if len(expand_outline_h3_set) > 0:
+            return expand_outline_h3_set
+
+        else:
+            h3_set_outline_ring_iter = map(lambda x : h3.grid_ring(x, k=1), outline_h3_set)
+            h3_set_outline_ring_iter = itertools.chain(*h3_set_outline_ring_iter)
+            h3_set_outline_ring = set(h3_set_outline_ring_iter)
+
+            return h3_set_outline_ring & h3_set
+
     def fill_h3(self, h3_contain="overlap"):
         h3_set_iter = map(lambda x : self.__h3_set_geom(x, h3_contain), self.geoms)
         h3_set = functools.reduce(lambda x1,x2 : x1 | x2, h3_set_iter, set())
         self.h3_list = list(h3_set)
 
+        self.h3_set_outline = self.__h3_set_outline(self.geoms, h3_set)
+
         return self.h3_list
 
-    def build_h3_strtree(self):
-        if len(self.h3_list) == 0:
-            return None
-
-        h3_boundary_iter = map(lambda x : h3.cell_to_boundary(x), self.h3_list)
-        h3_boundary_iter = map(lambda x : Polygon(map(lambda y : (y[1], y[0]), x)), h3_boundary_iter)
-        h3_boundary_list = list(h3_boundary_iter)
-        self.h3_strtree = STRtree(h3_boundary_list)
-
-        return self.h3_strtree
-
-    def h3_strtree_nearest_shapely(self, shapely_geom):
+    def nearest_h3_shapely(self, shapely_geom):
         try:
-            if self.h3_strtree is None:
-                return None
+            h3_set_shapely_geom = self.__h3_set_geom(shapely_geom, "overlap")
+            h3_set_outline_shapely_geom = self.__h3_set_outline([shapely_geom], h3_set_shapely_geom)
 
-            nearest_idx = self.h3_strtree.nearest(shapely_geom)
-            nearest_h3 = self.h3_list[nearest_idx]
+            h3_distance_iter = map(lambda x : (x[0], x[1], h3.grid_distance(*x)), itertools.product(self.h3_set_outline, h3_set_outline_shapely_geom))
+            min_h3, _, _ = min(h3_distance_iter, default=(None, None, None), key=lambda x : x[2])
 
-            return nearest_h3
+            return min_h3
 
         except ValueError as e:
-            raise ValueError(f"Failed to h3 strtree nearest shapely: {e}")
+            raise ValueError(f"Failed to h3 nearest shapely: {e}")
 
-    def h3_strtree_nearest_location(self, lat, lon):
+    def nearest_h3_location(self, lat, lon):
         try:
             geom = Point(lon, lat)
 
-            return self.h3_strtree_nearest_shapely(geom)
+            return self.nearest_h3_shapely(geom)
 
         except ValueError as e:
-            raise ValueError(f"Failed to h3 strtree nearest location: {e}")
-
-    def h3_strtree_query_shapely(self, shapely_geom, predicate=None, distance=None):
-        try:
-            if self.h3_strtree is None:
-                return None
-
-            idx_list = self.h3_strtree.query(shapely_geom, predicate=predicate, distance=distance).tolist()
-            h3_list = list(map(lambda x : self.h3_list[x], idx_list))
-
-            return h3_list
-
-        except ValueError as e:
-            raise ValueError(f"Failed to h3 strtree query shapely: {e}")
-
-    def h3_strtree_query_location(self, lat, lon, predicate=None, distance=None):
-        try:
-            geom = Point(lon, lat)
-
-            return self.h3_strtree_query_shapely(geom, predicate=predicate, distance=distance)
-
-        except ValueError as e:
-            raise ValueError(f"Failed to h3 strtree query location: {e}")
-
-    def h3_strtree_query_nearest_shapely(self, shapely_geom, max_distance=None, return_distance=False, exclusive=False, all_matches=True):
-        try:
-            if self.h3_strtree is None:
-                return None
-
-            is_single_geom = isinstance(shapely_geom, BaseGeometry)
-
-            if return_distance:
-                idxs, distances = self.h3_strtree.query_nearest(shapely_geom, max_distance=max_distance, return_distance=return_distance, exclusive=exclusive, all_matches=all_matches)
-
-                if is_single_geom:
-                    return (self.h3_list[idxs[0]], distances[0])
-
-                else:
-                    h3_iter = map(lambda x : self.h3_list[x], idxs)
-                    h3_distance_list = list(zip(h3_iter, distances))
-
-                    return h3_distance_list
-
-            else:
-                idxs = self.h3_strtree.query_nearest(shapely_geom, max_distance=max_distance, return_distance=return_distance, exclusive=exclusive, all_matches=all_matches)
-
-                return self.h3_list[idxs[0]] if is_single_geom else list(map(lambda x : self.h3_list[x], idxs))
-
-        except ValueError as e:
-            raise ValueError(f"Failed to h3 strtree query nearest shapely: {e}")
-
-    def h3_strtree_query_nearest_location(self, lat, lon, max_distance=None, return_distance=False, exclusive=False, all_matches=True):
-        try:
-            geom = Point(lon, lat)
-
-            return self.h3_strtree_query_nearest_shapely(geom, max_distance=max_distance, return_distance=return_distance, exclusive=exclusive, all_matches=all_matches)
-
-        except ValueError as e:
-            raise ValueError(f"Failed to h3 strtree query nearest location: {e}")
+            raise ValueError(f"Failed to h3 nearest location: {e}")
