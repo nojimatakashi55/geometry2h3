@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geometry2h3"
+version = "0.0.1"
+description = "Convert various geometries (GeoJSON, Shapely, etc.) to H3 indexes"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Takashi Nojima", email = "your.email@example.com" }
+]
+license = { file = "LICENSE" }
+keywords = ["h3", "geospatial", "geometry", "geojson", "shapely", "spatial index"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+dependencies = [
+    "h3>=4.0.0",
+    "shapely>=2.0.0",
+    "polyline>=2.0.0"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/geometry2h3"
+"Repository" = "https://github.com/yourusername/geometry2h3"
+"Issue Tracker" = "https://github.com/yourusername/geometry2h3/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
